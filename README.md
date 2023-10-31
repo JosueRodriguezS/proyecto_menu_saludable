@@ -29,7 +29,7 @@ python3 -m venv .venv
 ```bash
 source myenv/bin/activate
 ```
-3. Nos dirigimos a la carpta src y ejecutamos el comando:
+3. Nos dirigimos a la carpeta src y ejecutamos el comando:
 
 ```bash
 pip install -r requirements.txt
