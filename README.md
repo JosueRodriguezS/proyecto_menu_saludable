@@ -27,7 +27,7 @@ python3 -m venv .venv
 - Linux y Mac
 
 ```bash
-source myenv/bin/activate
+source .venv/bin/activate
 ```
 3. Nos dirigimos a la carpeta src y ejecutamos el comando:
 
