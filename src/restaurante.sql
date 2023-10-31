@@ -1,6 +1,10 @@
 -- SQLBook: Code
 -- restaurante.sql
 DROP TABLE IF EXISTS FoodElements;
+DROP TABLE IF EXISTS Platos;
+DROP TABLE IF EXISTS ComboPlates;
+DROP TABLE IF EXISTS MenuSaludable;
+
 CREATE TABLE IF NOT EXISTS FoodElements (
     name TEXT PRIMARY KEY,
     food_type TEXT,
@@ -24,11 +28,7 @@ CREATE TABLE IF NOT EXISTS ComboPlates (
     drink_name TEXT,
     protein_name TEXT,
     side_dish_name TEXT,
-    dessert_name TEXT,
-    FOREIGN KEY (drink_name) REFERENCES FoodElements(name),
-    FOREIGN KEY (protein_name) REFERENCES FoodElements(name),
-    FOREIGN KEY (side_dish_name) REFERENCES FoodElements(name),
-    FOREIGN KEY (dessert_name) REFERENCES FoodElements(name)
+    dessert_name TEXT
 );
 
 CREATE TABLE IF NOT EXISTS MenuSaludable (
@@ -39,11 +39,7 @@ CREATE TABLE IF NOT EXISTS MenuSaludable (
     drink_name TEXT,
     protein_name TEXT,
     side_dish_name TEXT,
-    dessert_name TEXT,
-    FOREIGN KEY (drink_name) REFERENCES FoodElements(name),
-    FOREIGN KEY (protein_name) REFERENCES FoodElements(name),
-    FOREIGN KEY (side_dish_name) REFERENCES FoodElements(name),
-    FOREIGN KEY (dessert_name) REFERENCES FoodElements(name)
+    dessert_name TEXT
 );
 -- Inserción de datos en la tabla FoodElements
 
@@ -51,6 +47,7 @@ INSERT INTO FoodElements (name, food_type, calories, characteristics, price) VAL
     ('cafe', 'bebida', 10, 'caliente, cafeina', 2000),
     ('leche', 'bebida', 20, 'frio, lacteo', 2500),
     ('jugo', 'bebida', 30, 'frio, fruta', 3000),
+    ('soda', 'bebida', 30, 'frio, gas', 3000),
     ('te', 'bebida', 5, 'caliente, hierba', 1000),
     ('agua', 'bebida', 0, 'frio, incoloro', 500),
     ('refresco', 'bebida', 50, 'frio, gas, azucar', 1500),
@@ -109,7 +106,7 @@ INSERT INTO FoodElements (name, food_type, calories, characteristics, price) VAL
     ('donut', 'postre', 100, 'azucar, harina, lacteo', 1500),
     ('pie', 'postre', 100, 'azucar, harina, lacteo', 1500),
     ('pastelillo', 'postre', 100, 'azucar, harina, lacteo', 1500),
-    ('ensalada_de_fruta', 'postre', 100, 'fruta', 1500),
+    ('ensalada', 'postre', 100, 'fruta', 1500),
     ('pan_dulce', 'postre', 100, 'azucar, harina, lacteo', 1500),
     ('flan', 'postre', 100, 'azucar, lacteo', 1500);
 
@@ -143,16 +140,16 @@ INSERT INTO Platos (name, price, calories) VALUES
 
 -- Insercion de 15 combo en la tabla ComboPlates
 INSERT INTO ComboPlates (name, price, calories, drink_name, protein_name, side_dish_name, dessert_name) VALUES
-    ('Combo 1', 15, 12000, 'Soda', 'Pollo', 'Papas', 'Pastel'),
-    ('Combo 2', 14, 10050, 'Jugo', 'Carne', 'Arroz', 'Helado'),
-    ('Combo 3', 16, 12000, 'Te', 'Tofu', 'Ensalada', 'Galletas'),
-    ('Combo 4', 15, 11000, 'Cerveza', 'Pescado', 'Papas', 'Cupcakes'),
-    ('Combo 5', 14, 10500, 'Agua', 'Hamburguesa', 'Papas Fritas', 'Flan'),
-    ('Combo 6', 16, 12000, 'Leche', 'Jamon', 'Tortilla', 'Donut'),
-    ('Combo 7', 15, 11000, 'Vino', 'Hotdog', 'Papa', 'Pie'),
-    ('Combo 8', 14, 10500, 'Leche', 'Lentejas', 'Lechuga', 'Pan Dulce'),
-    ('Combo 9', 16, 12000, 'Te', 'Tocino', 'Tomate', 'Gelatina'),
-    ('Combo 10', 15, 11000, 'Cerveza', 'Huevo', 'Zanahoria', 'Helado');
+    ('Combo 1', 15, 12000, 'soda', 'pollo', 'papas_fritas', 'pastel'),
+    ('Combo 2', 14, 10050, 'jugo', 'carne', 'arroz', 'helado'),
+    ('Combo 3', 16, 12000, 'te', 'tofu', 'ensalada', 'galletas'),
+    ('Combo 4', 15, 11000, 'cerveza', 'pescado', 'papas_fritas', 'pastelillo'),
+    ('Combo 5', 14, 10500, 'agua', 'hamburguesa', 'papas_fritas', 'flan'),
+    ('Combo 6', 16, 12000, 'leche', 'jamon', 'tortilla', 'donut'),
+    ('Combo 7', 15, 11000, 'vino', 'hotdog', 'papa', 'pie'),
+    ('Combo 8', 14, 10500, 'leche', 'lentejas', 'lechuga', 'pan_dulce'),
+    ('Combo 9', 16, 12000, 'te', 'tocino', 'tomate', 'gelatina'),
+    ('Combo 10', 15, 11000, 'cerveza', 'huevo', 'zanahoria', 'helado');
 
 
 
