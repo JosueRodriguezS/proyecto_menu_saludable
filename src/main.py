@@ -1,8 +1,15 @@
-import sqlite3
-import app.form_menu_saludable as fms # Importa el formulario de menú saludable
+#region imports
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QAction
+from PyQt5.QtCore import Qt
 
+import sys
+import sqlite3
+
+from app.form_menu_saludable import menuSaludableWindow
 from modules.inventario import FoodElement, Inventory
 from modules.plato import ComboPlate
+from app.view_inventory import InventoryWindow
+#endregion
 from modules.menuSaludable import MenuSaludable
 
 conn = sqlite3.connect('restaurante.db')
@@ -106,3 +113,47 @@ for menu_saludable in menu_saludables:
     print()
 
 conn.close()
+
+#PyQ5 Invetory Window Region
+
+
+# Class for the main window
+class MyApp(QMainWindow):
+    def __init__(self) -> None:
+        super().__init__()
+        
+        self.setWindowTitle("Restaurante")
+        self.setGeometry(100, 100, 600, 400)
+
+        menubar = self.menuBar()
+
+        # Create the menu items
+        inventory_menu = menubar.addMenu("Inventario")
+        order_menu = menubar.addMenu("Ordenes y Pagos")
+        report_menu = menubar.addMenu("Reportes")
+        statistics_menu = menubar.addMenu("Estadísticas")
+
+        # Add the actions to the menus
+        inventory_action = QAction("Editar inventario", self)
+        inventory_action.triggered.connect(self.open_inventory)
+        inventory_menu.addAction(inventory_action)
+
+    def open_inventory(self):
+        self.inventory_window = InventoryWindow(inventory)
+        self.inventory_window.show()
+
+def main():
+    app = QApplication(sys.argv)
+
+    windows = MyApp()
+    windows.show()
+
+    sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    main()
+
+
+
+    
+

@@ -26,7 +26,7 @@ class FoodElement:
 NOTA: Esta clase va implementar el patrón de diseño Singleton.
 La clase Inventory va a representar el inventario de FoodElements que se van a guardar en el sistema.
 Inventory va a tener los siguientes atributos:
- - food_elements: list
+ - food_elements: dict[food_name, FoodElement]
 """
 class Inventory:
     _instance = None

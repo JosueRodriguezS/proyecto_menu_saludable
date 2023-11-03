@@ -38,12 +38,14 @@ class Payment:
     orders: list[Order]
     is_cash: bool
     billing_amount: int
+    statys: bool  # True si el pago fue exitoso, False si no lo fue
 
     # Constructor de la clase Payment
     def __init__(self, orders: list[Order], is_cash: bool) -> None:
         self.orders = orders
         self.is_cash = is_cash
         self.billing_amount = self.calculate_billing_amount()
+        self.status = False
 
     # Método para calcular el monto de la factura
     def calculate_billing_amount(self) -> None:
