@@ -154,10 +154,6 @@ class InventoryWindow(QWidget):
         self.setGeometry(100, 100, 1200, 1000)
         
         # Add the neccesary buttons
-        self.add_button = QPushButton("Refresh", self)
-        self.add_button.setGeometry(50, 50, 100, 30)
-        self.add_button.clicked.connect(self.populate_table)
-
         self.add_button = QPushButton("Agregar", self)
         self.add_button.setGeometry(50, 10, 100, 30)
         self.add_button.clicked.connect(self.add_food)
@@ -170,8 +166,12 @@ class InventoryWindow(QWidget):
         self.delete_button.setGeometry(250, 10, 100, 30)
         self.delete_button.clicked.connect(self.delete_food)
 
+        self.add_button = QPushButton("Refresh", self)
+        self.add_button.setGeometry(350, 10, 100, 30)
+        self.add_button.clicked.connect(self.populate_table)
+
         self.tableWidget = QTableWidget(self)
-        self.tableWidget.setGeometry(150, 150, 600, 400)
+        self.tableWidget.setGeometry(50, 50, 650, 650)
         self.tableWidget.setColumnCount(5)
         self.tableWidget.setHorizontalHeaderLabels(["Nombre", "Tipo de comida", "Calorias", "Caracteristicas", "Precio"])
 

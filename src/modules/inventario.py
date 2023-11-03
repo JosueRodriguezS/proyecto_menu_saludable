@@ -56,3 +56,14 @@ class Inventory:
     def get_food_elements_names(self, food_type: str) -> list[str]:
         return [food_element.name for food_element in self.food_elements.values() if food_element.food_type == food_type]
 
+
+    # Método para obtener las características posibles de los FoodElements en el inventario
+    def get_all_characteristics(self) -> list:
+        all_characteristics = set()
+
+        for food_element in self.food_elements.values():
+            characteristics = food_element.characteristics.split(', ')  # Dividir las características por comas y espacio
+            all_characteristics.update(characteristics)
+
+        return list(all_characteristics)
+

@@ -116,6 +116,7 @@ for menu_saludable in menu_saludables:
 
 conn.close()
 
+print(inventory.get_all_characteristics())
 #PyQ5 Invetory Window Region
 
 
