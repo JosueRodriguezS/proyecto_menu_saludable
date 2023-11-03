@@ -155,14 +155,14 @@ INSERT INTO ComboPlates (name, price, calories, drink_name, protein_name, side_d
 
 -- Inserción de datos en la tabla MenuSaludable
 INSERT INTO MenuSaludable (name, price, calories, drink_name, protein_name, side_dish_name, dessert_name) VALUES
-    ('Menu Saludable 1', 12, 15000, 'Agua', 'Pechuga de Pollo a la Parrilla', 'Ensalada de Espinaca', 'Fruta Fresca'),
-    ('Menu Saludable 2', 14, 10550, 'Jugo de Naranja Natural', 'Salmon a la Parrilla', 'Brocoli al Vapor', 'Yogur Bajo en Grasa'),
-    ('Menu Saludable 3', 13, 13480, 'Te Verde', 'Tofu a la Parrilla', 'Ensalada de Quinua', 'Compota de Manzana Sin Azucar'),
-    ('Menu Saludable 4', 12, 15490, 'Agua de Coco', 'Pechuga de Pavo a la Parrilla', 'Zanahorias Baby', 'Fruta Mixta'),
-    ('Menu Saludable 5', 15, 18550, 'Jugo de Zanahoria Fresco', 'Pechuga de Pollo a la Parrilla', 'Esparragos al Vapor', 'Gelatina Sin Azucar'),
-    ('Menu Saludable 6', 13, 14520, 'Te de Hierbas', 'Salmon al Horno', 'Brocoli al Vapor', 'Compota de Pera Sin Azucar'),
-    ('Menu Saludable 7', 14, 12530, 'Agua con Limon', 'Tofu Salteado con Verduras', 'Ensalada de Lentejas', 'Yogur Natural'),
-    ('Menu Saludable 8', 15, 11600, 'Jugo de Manzana Natural', 'Pechuga de Pollo a la Parrilla', 'Espinacas Salteadas', 'Fruta Fresca'),
-    ('Menu Saludable 9', 12, 15470, 'Te de Menta', 'Salmon a la Parrilla', 'Col Rizada al Vapor', 'Yogur Griego Bajo en Grasa'),
-    ('Menu Saludable 10', 14, 16520, 'Agua Mineral', 'Tofu a la Parrilla con Salsa de Soja', 'Ensalada de Garbanzos', 'Compota de Ciruela Sin Azucar');
+    ('Menu Saludable 1', 12, 15000, 'agua', 'huevo', 'sandia', 'flan'),
+    ('Menu Saludable 2', 14, 10550, 'soda', 'salchicha', 'crema', 'ensalada'),
+    ('Menu Saludable 3', 13, 13480, 'leche', 'carne', 'crema', 'flan'),
+    ('Menu Saludable 4', 12, 15490, 'agua', 'pollo', 'zanahoria', 'ensalada'),
+    ('Menu Saludable 5', 15, 18550, 'leche', 'pollo', 'sandia', 'flan'),
+    ('Menu Saludable 6', 13, 14520, 'te', 'carne', 'zanahoria', 'ensalada'),
+    ('Menu Saludable 7', 14, 12530, 'agua', 'huevo', 'crema', 'flan'),
+    ('Menu Saludable 8', 15, 11600, 'te', 'carne', 'zanahoria', 'ensalada'),
+    ('Menu Saludable 9', 12, 15470, 'soda', 'carne', 'crema', 'flan'),
+    ('Menu Saludable 10', 14, 16520, 'agua', 'huevo', 'sandia', 'ensalada');
 
