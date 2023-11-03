@@ -38,5 +38,27 @@ class ComboPlate(Plato):
         self.side_dish = side_dish
         self.dessert = dessert
 
-def create_combo_plate(id, name, price, calories, drink, protein, side_dish, dessert) -> ComboPlate:
-    return ComboPlate(id=id, name=name, price=price, calories=calories, drink=drink, protein=protein, side_dish=side_dish, dessert=dessert)
+    def set_drink(self, drink: FoodElement):
+        self.drink = drink
+
+    def set_protein(self, protein: FoodElement):
+        self.protein = protein
+
+    def set_side_dish(self, side_dish: FoodElement):
+        self.side_dish = side_dish
+
+    def set_dessert(self, dessert: FoodElement):
+        self.dessert = dessert
+
+    def set_price(self, price: int):
+        self.price = price
+
+    def set_calories(self, calories: int):
+        self.calories = calories
+
+# Clase para manejar el factory de combos
+class ComboPlateFactory:
+    @staticmethod
+    # Función para crear un objeto ComboPlate
+    def create_combo_plate(id: int, name: str, price: float, calories: float, drink: str, protein: str, side_dish: str, dessert: str) -> ComboPlate:
+        return ComboPlate(id=id, name=name, price=price, calories=calories, drink=drink, protein=protein, side_dish=side_dish, dessert=dessert)

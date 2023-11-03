@@ -52,3 +52,7 @@ class Inventory:
         if food_element_name in self.food_elements:
             self.food_elements[food_element_name] = modified_element
 
+    # Método para obtener una lista de los nombres de los FoodElements por tipo
+    def get_food_elements_names(self, food_type: str) -> list[str]:
+        return [food_element.name for food_element in self.food_elements.values() if food_element.food_type == food_type]
+

@@ -186,7 +186,7 @@ class InventoryWindow(QWidget):
         self.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
     # Método para poblar la tabla con los datos del inventario
-    def populate_table(self):
+    def populate_table(self) -> None:
         # Obtain the food elements from the inventory
         food_elements = self.inventory.food_elements.values()
 
@@ -218,12 +218,10 @@ class InventoryWindow(QWidget):
             food_type = dialog.get_food_type()
             calories = dialog.get_calories()
             characteristics = dialog.get_characteristics()
-            print(characteristics)
             price = dialog.get_price()
 
             food_element = FoodElement(name, food_type, calories, characteristics, price)
             self.inventory.add_food_element(food_element)
-            print(self.inventory.food_elements)
 
             # Guardar los cambios en la base de datos
             conn = sqlite3.connect('restaurante.db')
@@ -263,7 +261,6 @@ class InventoryWindow(QWidget):
 
                     # Editar el FoodElement en el inventario
                     self.inventory.modify_food_element(selected_food_element_name, new_food_element)
-                    print(self.inventory.food_elements)
 
                     # Guardar los cambios en la base de datos
                     conn = sqlite3.connect('restaurante.db')

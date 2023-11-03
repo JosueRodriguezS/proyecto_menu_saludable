@@ -8,9 +8,11 @@ import sqlite3
 from app.form_menu_saludable import menuSaludableWindow
 from modules.inventario import FoodElement, Inventory
 from modules.plato import ComboPlate
-from app.view_inventory import InventoryWindow
-#endregion
 from modules.menuSaludable import MenuSaludable
+
+from app.view_inventory import InventoryWindow
+from app.view_dishes import DishWindow
+#endregion
 
 conn = sqlite3.connect('restaurante.db')
 cursor = conn.cursor()
@@ -129,19 +131,37 @@ class MyApp(QMainWindow):
 
         # Create the menu items
         inventory_menu = menubar.addMenu("Inventario")
+        dish_menu = menubar.addMenu("Platillos")
         order_menu = menubar.addMenu("Ordenes y Pagos")
         report_menu = menubar.addMenu("Reportes")
-        statistics_menu = menubar.addMenu("Estadísticas")
+
 
         # Add the actions to the menus
         inventory_action = QAction("Editar inventario", self)
         inventory_action.triggered.connect(self.open_inventory)
         inventory_menu.addAction(inventory_action)
 
+        dish_action = QAction("Ver platillos", self)
+        dish_action.triggered.connect(self.open_dish)
+        dish_menu.addAction(dish_action)
+        """
+        order_action = QAction("Ordenar", self)
+        order_action.triggered.connect(self.open_order)
+        order_menu.addAction(order_action)
+        """
     def open_inventory(self):
         self.inventory_window = InventoryWindow(inventory)
         self.inventory_window.show()
 
+    def open_dish(self):
+        self.dish_window = DishWindow(inventory, combo_plates, menu_saludables)
+        self.dish_window.show()
+    
+    """
+    def open_order(self):
+        self.order_window = OrderPaymentWindo()
+        self.order_window.show()
+    """
 def main():
     app = QApplication(sys.argv)
 
