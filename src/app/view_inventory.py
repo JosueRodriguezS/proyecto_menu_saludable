@@ -20,7 +20,7 @@ class AddFoodElementDialog(QDialog):
 
         self.food_type_label = QLabel("Tipo de comida")
         self.food_type_imput = QComboBox()
-        self.food_type_imput.addItems(["Bebida", "Proteina", "Acompañamiento", "Postre"])
+        self.food_type_imput.addItems(["bebida", "proteina", "acompanamiento", "postre"])
         layout.addWidget(self.food_type_label)
         layout.addWidget(self.food_type_imput)
 
@@ -79,7 +79,7 @@ class EditFoodElementDialog(QDialog):
 
         self.food_type_label = QLabel("Tipo de comida")
         self.food_type_imput = QComboBox()
-        self.food_type_imput.addItems(["Bebida", "Proteina", "Acompañamiento", "Postre"])
+        self.food_type_imput.addItems(["bebida", "proteina", "acompanamiento", "postre"])
         self.food_type_imput.setCurrentText(food_element.food_type)
         layout.addWidget(self.food_type_label)
         layout.addWidget(self.food_type_imput)
@@ -147,9 +147,10 @@ class DeleteFoodElementDialog(QDialog):
 
 # Clase para visualizar el inventario de comidas
 class InventoryWindow(QWidget):
-    def __init__(self, inventory: Inventory) -> None:
+    def __init__(self, restaurant_model) -> None:
         super().__init__()
-        self.inventory = inventory
+        self.restaurant_model = restaurant_model
+        self.inventory = self.restaurant_model.inventory
         self.setWindowTitle("Inventario de comidas")
         self.setGeometry(100, 100, 1200, 1000)
         

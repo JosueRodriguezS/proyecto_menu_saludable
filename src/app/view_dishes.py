@@ -4,6 +4,7 @@ from modules.plato import ComboPlate, ComboPlateFactory
 from modules.menuSaludable import MenuSaludable
 from modules.inventario import FoodElement, Inventory
 
+# region Button Dialog
 # Clase para manejar la ventana de agregar combos
 class AddComboWindow(QDialog):
     def __init__(self, inventoryData: Inventory) -> None:
@@ -199,7 +200,9 @@ class DeleteComboWindow(QDialog):
         layout.addWidget(self.add_button)
 
         self.setLayout(layout)
+# endregion
 
+# region Search Dialog
 # Clase para manejar la ventana de buscar combos por rango de precio
 class SearchComboByPriceWindow(QDialog):
     def __init__(self) -> None:
@@ -291,14 +294,16 @@ class SearchComboByNameWindow(QDialog):
     # Método para obtener el contenido del nombre a buscar
     def get_name(self) -> str:
         return self.name_input.text()
+# endregion
 
 # Clase para vizualizar los combos y el menu saludable
 class DishWindow(QWidget):
-    def __init__(self, inventoryData: Inventory, combo_platesData: ComboPlate, menu_saludablesData: MenuSaludable) -> None:
+    def __init__(self, restaurant_model) -> None:
         super().__init__()
-        self.inventoryData: Inventory = inventoryData
-        self.combo_platesData: ComboPlate = combo_platesData
-        self.menu_saludablesData: MenuSaludable = menu_saludablesData
+        self.restaurant_model = restaurant_model
+        self.inventoryData: Inventory = restaurant_model.inventory
+        self.combo_platesData: list[ComboPlate] = restaurant_model.combo_plates
+        self.menu_saludablesData: MenuSaludable = restaurant_model.menu_saludables
         self.setWindowTitle("Combos y Menu Saludable")
         self.setGeometry(100, 100, 1200, 1000)
 
@@ -353,6 +358,7 @@ class DishWindow(QWidget):
         # Populando la tabla de combos
         self.populate_combo_table()
 
+    # region Combo Plate Table
     # Método para poblar la tabla de combos
     def populate_combo_table(self) -> None:
 
@@ -490,43 +496,47 @@ class DishWindow(QWidget):
                         self.combo_platesTable.setItem(rowPosition, 6, QTableWidgetItem(combo_plate.side_dish.name))
         except:
             QMessageBox.warning(self, "Error", "No se ha dado un nombre o contenido del nombre")
+    # endregion
 
     # Método para agregar un combo
     def add_combo(self) -> None:
 
-        dialog = AddComboWindow(self.inventoryData)
-        inventoryData = self.inventoryData
+        try:
+            dialog = AddComboWindow(self.inventoryData)
+            inventoryData = self.inventoryData
 
-        if dialog.exec() == QDialog.Accepted:
-            name = dialog.get_name()
-            price = dialog.get_price()
-            calories = dialog.get_calories()
-            drink = dialog.get_drink()
-            protein = dialog.get_protein()
-            side_dish = dialog.get_side_dish()
-            dessert = dialog.get_dessert()
+            if dialog.exec() == QDialog.Accepted:
+                name = dialog.get_name()
+                price = dialog.get_price()
+                calories = dialog.get_calories()
+                drink = dialog.get_drink()
+                protein = dialog.get_protein()
+                side_dish = dialog.get_side_dish()
+                dessert = dialog.get_dessert()
 
-            # Del inventario se obtienen los elementos para el combo
-            drink_temp = inventoryData.food_elements[drink]
-            protein_temp = inventoryData.food_elements[protein]
-            side_dish_tem = inventoryData.food_elements[side_dish]
-            dessert_tem = inventoryData.food_elements[dessert]
+                # Del inventario se obtienen los elementos para el combo
+                drink_temp = inventoryData.food_elements[drink]
+                protein_temp = inventoryData.food_elements[protein]
+                side_dish_tem = inventoryData.food_elements[side_dish]
+                dessert_tem = inventoryData.food_elements[dessert]
 
-            # Se crea el combo
-            # Chequear cual es el id del ultimo combo
-            id = self.combo_platesData[-1].id + 1
-            combo_plate = ComboPlateFactory.create_combo_plate(id=id, name=name, price=price, calories=calories, drink=drink_temp, protein=protein_temp, side_dish=side_dish_tem, dessert=dessert_tem)
-            self.combo_platesData.append(combo_plate)
+                # Se crea el combo
+                # Chequear cual es el id del ultimo combo
+                id = self.combo_platesData[-1].id + 1
+                combo_plate = ComboPlateFactory.create_combo_plate(id=id, name=name, price=price, calories=calories, drink=drink_temp, protein=protein_temp, side_dish=side_dish_tem, dessert=dessert_tem)
+                self.combo_platesData.append(combo_plate)
 
-            # Guardar el combo en la base de datos
-            conn: sqlite3.Connection = sqlite3.connect("restaurante.db")
-            cursor: sqlite3.Cursor = conn.cursor()
-            cursor.execute("INSERT INTO ComboPlates(name, price, calories, drink_name, protein_name, side_dish_name, dessert_name) VALUES (?, ?, ?, ?, ?, ?, ?)", (name, price, calories, drink, protein, side_dish, dessert))
-            conn.commit()
-            conn.close()
+                # Guardar el combo en la base de datos
+                conn: sqlite3.Connection = sqlite3.connect("restaurante.db")
+                cursor: sqlite3.Cursor = conn.cursor()
+                cursor.execute("INSERT INTO ComboPlates(name, price, calories, drink_name, protein_name, side_dish_name, dessert_name) VALUES (?, ?, ?, ?, ?, ?, ?)", (name, price, calories, drink, protein, side_dish, dessert))
+                conn.commit()
+                conn.close()
 
-            # Actualizar la tabla de combos
-            self.populate_combo_table()
+                # Actualizar la tabla de combos
+                self.populate_combo_table()
+        except:
+            QMessageBox.warning(self, "Error", "No se ha podido agregar el combo intentalo de nuevo")
 
     # Método para modificar un combo
     def modify_combo(self) -> None:

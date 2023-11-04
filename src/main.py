@@ -9,11 +9,15 @@ from app.form_menu_saludable import menuSaludableWindow
 from modules.inventario import FoodElement, Inventory
 from modules.plato import ComboPlate
 from modules.menuSaludable import MenuSaludable
+from modules.ordenes import Order, Payment, Table, OrderLog, PaymentLog
 
 from app.view_inventory import InventoryWindow
 from app.view_dishes import DishWindow
+from app.view_orders import OrderPaymentWindow
 #endregion
 
+#region connection
+# Crear una conexión a la base de datos
 conn = sqlite3.connect('restaurante.db')
 cursor = conn.cursor()
 
@@ -24,7 +28,11 @@ with open('restaurante.sql', 'r') as sql_file:
 
 # Guarda los cambios en la base de datos
 conn.commit()
+#endregion
 
+#region de quemado de datos
+
+#Inventario
 # Crear un objeto de tipo inventario y agregar los datos de la base de datos
 inventory = Inventory()
 
@@ -47,6 +55,7 @@ for name, food_element in inventory.food_elements.items():
     print(f"Price: ${food_element.price / 100:.2f}")
     print()
 
+# ComboPlates
 # Consulta SQL para obtener todos los datos de ComboPlates
 cursor.execute("SELECT id, name, price, calories, drink_name, protein_name, side_dish_name, dessert_name FROM ComboPlates")
 combo_plates_data = cursor.fetchall()
@@ -81,7 +90,7 @@ for combo_plate in combo_plates:
     print(f"Dessert: {combo_plate.dessert.name}")
     print()
 
-
+# MenuSaludable
 # Consulta SQL para obtener todos los datos de menu_saludable
 cursor.execute("SELECT id, name, price, calories, drink_name, protein_name, side_dish_name, dessert_name FROM MenuSaludable")
 menu_saludable_data = cursor.fetchall()
@@ -116,15 +125,52 @@ for menu_saludable in menu_saludables:
 
 conn.close()
 
-print(inventory.get_all_characteristics())
-#PyQ5 Invetory Window Region
+"""
+Tables/Orders/Payments
+En esta parte del código se van a crear las mesas, las ordenes y los pagos.
+Se toma en cuenta la creación de los logs de ordenes y pagos.
+"""
+# Crear el log de ordenes
+order_log = OrderLog()
+# Crear el log de pagos
+payment_log = PaymentLog()
 
+# Crear las mesas del restaurante 1 a 6
+tables = {}
+table1 = Table(number=1, order_log=order_log, payment_log=payment_log, number_of_customers=0, single_bill=False, status="Libre")
+table2 = Table(number=2, order_log=order_log, payment_log=payment_log, number_of_customers=0, single_bill=False, status="Libre")
+table3 = Table(number=3, order_log=order_log, payment_log=payment_log, number_of_customers=0, single_bill=False, status="Libre")
+table4 = Table(number=4, order_log=order_log, payment_log=payment_log, number_of_customers=0, single_bill=False, status="Libre")
+table5 = Table(number=5, order_log=order_log, payment_log=payment_log, number_of_customers=0, single_bill=False, status="Libre")
+table6 = Table(number=6, order_log=order_log, payment_log=payment_log, number_of_customers=0, single_bill=False, status="Libre")
 
+# Agregar las mesas al diccionario tables
+tables[1] = table1
+tables[2] = table2
+tables[3] = table3
+tables[4] = table4
+tables[5] = table5
+tables[6] = table6
+#endregion
+
+#region de la clase restaurante para mantener los datos actualizados mientras se usa el programa
+class RestauranteModel:
+    def __init__(self) -> None:
+        self.inventory: Inventory = inventory
+        self.combo_plates = combo_plates
+        self.menu_saludables = menu_saludables
+        self.tables = tables
+        self.order_log = order_log
+        self.payment_log = payment_log
+#endregion
+
+#region main window
 # Class for the main window
 class MyApp(QMainWindow):
-    def __init__(self) -> None:
+    def __init__(self, restaurant_model) -> None:
         super().__init__()
-        
+        self.restaurant_model = restaurant_model
+
         self.setWindowTitle("Restaurante")
         self.setGeometry(100, 100, 600, 400)
 
@@ -145,35 +191,36 @@ class MyApp(QMainWindow):
         dish_action = QAction("Ver platillos", self)
         dish_action.triggered.connect(self.open_dish)
         dish_menu.addAction(dish_action)
-        """
+        
         order_action = QAction("Ordenar", self)
         order_action.triggered.connect(self.open_order)
         order_menu.addAction(order_action)
-        """
+    
     def open_inventory(self):
-        self.inventory_window = InventoryWindow(inventory)
+        self.inventory_window = InventoryWindow(self.restaurant_model)
         self.inventory_window.show()
 
     def open_dish(self):
-        self.dish_window = DishWindow(inventory, combo_plates, menu_saludables)
+        self.dish_window = DishWindow(self.restaurant_model)
         self.dish_window.show()
     
-    """
     def open_order(self):
-        self.order_window = OrderPaymentWindo()
+        self.order_window = OrderPaymentWindow(self.restaurant_model)
         self.order_window.show()
-    """
+    
 def main():
     app = QApplication(sys.argv)
 
-    windows = MyApp()
+    restaurant_model = RestauranteModel()
+    
+    windows = MyApp(restaurant_model=restaurant_model)
     windows.show()
 
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
     main()
-
+#endregion
 
 
     

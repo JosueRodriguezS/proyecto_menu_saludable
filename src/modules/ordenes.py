@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from modules.plato import Plato
-import datetime
+from datetime import datetime
 
 """
 NOTA: Esta clase va implementar el patrón de diseño Observer.
@@ -38,7 +38,7 @@ class Payment:
     orders: list[Order]
     is_cash: bool
     billing_amount: int
-    statys: bool  # True si el pago fue exitoso, False si no lo fue
+    status: bool  # True si el pago fue exitoso, False si no lo fue
 
     # Constructor de la clase Payment
     def __init__(self, orders: list[Order], is_cash: bool) -> None:
@@ -140,17 +140,29 @@ class Table:
         self.orders = []
         self.payments = []
     
+    # Metos para agregar ordenes y pagos
     def add_order(self, order: Order) -> None:
         self.orders.append(order)
-        self.notify_orderLog(order=order)
-
-    def notify_order_log(self, order: Order) -> None:
-        self.order_log.update(order=order)
+        self.notify_order_log(order=order)
 
     def add_payment(self, payment: Payment) -> None:
         self.payments.append(payment)
         self.notify_payment_log(payment=payment)
 
+    # Métodos para notificar a los observadores
+    def notify_order_log(self, order: Order) -> None:
+        self.order_log.update(order=order)
+
     def notify_payment_log(self, payment: Payment) -> None:
         self.payment_log.update(payment=payment)
+
+    # Metodos para editar el numero de clientes, el estado y la cuenta unica
+    def edit_number_of_customers(self, number_of_customers: int) -> None:
+        self.number_of_customers = number_of_customers
+
+    def edit_status(self, status: str) -> None:
+        self.status = status
+
+    def edit_single_bill(self, single_bill: bool) -> None:
+        self.single_bill = single_bill
         
