@@ -17,3 +17,6 @@ class MenuSaludable(Plato):
         self.protein = protein
         self.side_dish = side_dish
         self.dessert = dessert
+
+    def is_combo(self) -> bool:
+        return False

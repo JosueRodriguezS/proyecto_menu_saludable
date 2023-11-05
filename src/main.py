@@ -14,6 +14,7 @@ from modules.ordenes import Order, Payment, Table, OrderLog, PaymentLog
 from app.view_inventory import InventoryWindow
 from app.view_dishes import DishWindow
 from app.view_orders import OrderPaymentWindow
+from app.view_reports import ReportWindows
 #endregion
 
 #region connection
@@ -157,9 +158,14 @@ tables[6] = table6
 order1 = Order(1, "carlos", "Lista")
 order1.add_dish(combo_plates[0])
 order1.add_dish(combo_plates[3])
+order1.add_dish(menu_saludables[2])
+order1.add_dish(menu_saludables[3])
+
 order2 = Order(2, "juan", "Lista")
 order2.add_dish(combo_plates[1])
 order2.add_dish(combo_plates[4])
+order2.add_dish(menu_saludables[0])
+order2.add_dish(menu_saludables[1])
 table1.add_order(order1)
 table3.add_order(order2)
 
@@ -215,6 +221,10 @@ class MyApp(QMainWindow):
         order_action = QAction("Ordenar", self)
         order_action.triggered.connect(self.open_order)
         order_menu.addAction(order_action)
+
+        report_action = QAction("Ver reportes", self)
+        report_action.triggered.connect(self.open_report)
+        report_menu.addAction(report_action)
     
     def open_inventory(self):
         self.inventory_window = InventoryWindow(self.restaurant_model)
@@ -228,6 +238,10 @@ class MyApp(QMainWindow):
         self.order_window = OrderPaymentWindow(self.restaurant_model)
         self.order_window.show()
     
+    def open_report(self):
+        self.report_window = ReportWindows(self.restaurant_model)
+        self.report_window.show()
+
 def main():
     app = QApplication(sys.argv)
 

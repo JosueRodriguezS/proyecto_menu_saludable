@@ -21,7 +21,6 @@ class Plato:
         self.price = price
         self.calories = calories
 
-
 class ComboPlate(Plato):
     drink: FoodElement
     protein: FoodElement
@@ -55,6 +54,9 @@ class ComboPlate(Plato):
 
     def set_calories(self, calories: int):
         self.calories = calories
+
+    def is_combo(self) -> bool:
+        return True
 
 # Clase para manejar el factory de combos
 class ComboPlateFactory:
