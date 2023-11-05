@@ -59,6 +59,7 @@ class Payment:
     def change_status(self, status: bool) -> None:
         self.status = status
 
+
 """
 Nota: esta clase va implementar el patrón de diseño Observer.
 Esta la clase que va a representar a los observadores de los pagos.

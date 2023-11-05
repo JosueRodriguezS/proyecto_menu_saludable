@@ -173,6 +173,7 @@ table3.add_order(order2)
 temp_order1 = [order1]
 temp_order2 = [order2]
 payment1 = Payment(temp_order1, True)
+payment1.change_status(True)
 payment2 = Payment(temp_order2, True)
 table1.add_payment(payment1)
 table3.add_payment(payment2)

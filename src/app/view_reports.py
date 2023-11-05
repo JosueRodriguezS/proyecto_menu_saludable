@@ -1,8 +1,9 @@
-import sys
-import random
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime
 from functools import reduce
 from collections import Counter
-from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QAbstractItemView, QPushButton, QWidget, QVBoxLayout, QLabel, QDialog, QDateEdit
+from PyQt5.QtWidgets import QMessageBox, QTableWidget, QTableWidgetItem, QHeaderView, QAbstractItemView, QPushButton, QWidget, QVBoxLayout, QLabel, QDialog, QDateEdit
 from PyQt5.QtGui import QFont
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -111,8 +112,8 @@ class ReportWindows(QWidget):
         self.order_report_table = QTableWidget(self)
         self.order_report_table.move(10, 50)
         self.order_report_table.setFixedSize(800, 400)
-        self.order_report_table.setColumnCount(7)
-        self.order_report_table.setHorizontalHeaderLabels(["Nombre", "Precio", "Calorias", "Bebida", "Proteina", "Acompañamiento", "Postre"])
+        self.order_report_table.setColumnCount(5)
+        self.order_report_table.setHorizontalHeaderLabels(["Nombre", "Mesa", "Cliente", "Estado", "Pedido:"])
         self.order_report_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.order_report_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.order_report_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -156,38 +157,48 @@ class ReportWindows(QWidget):
 
         # Label de las estadisticas de pagos
         self.payment_stats_label = QLabel("Estadísticas de pagos", self)
-        self.payment_stats_label.move(850, 460)
+        self.payment_stats_label.move(850, 260)
         self.payment_stats_label.setFont(QFont('Arial', 20))
 
         # Espacio para colocar el rango de fechas a filtrar
         self.date_range_label = QLabel("Rango de fechas", self)
-        self.date_range_label.move(850, 510)
+        self.date_range_label.move(850, 310)
         self.date_range_label.setFont(QFont('Arial', 20))
 
         # Fecha inicial
         self.start_date_label = QLabel("Fecha inicial", self)
-        self.start_date_label.move(850, 560)
+        self.start_date_label.move(850, 360)
         self.start_date_label.setFont(QFont('Arial', 15))
 
         self.start_date_input = QDateEdit(self)
-        self.start_date_input.move(850, 590)
+        self.start_date_input.move(850, 390)
         self.start_date_input.setFixedSize(200, 30)
         self.start_date_input.setCalendarPopup(True)
 
         # Fecha final
         self.end_date_label = QLabel("Fecha final", self)
-        self.end_date_label.move(850, 630)
+        self.end_date_label.move(850, 430)
         self.end_date_label.setFont(QFont('Arial', 15))
 
         self.end_date_input = QDateEdit(self)
-        self.end_date_input.move(850, 660)
+        self.end_date_input.move(850, 460)
         self.end_date_input.setFixedSize(200, 30)
         self.end_date_input.setCalendarPopup(True)
 
         # Boton para generar la estadistica segun el rango de fechas de los pagos
         self.generate_payment_stats_button = QPushButton("Generar estadísticas de pagos", self)
-        self.generate_payment_stats_button.move(850, 700)
-        #self.generate_payment_stats_button.clicked.connect(self.show_payment_stats)
+        self.generate_payment_stats_button.move(850, 500)
+        self.generate_payment_stats_button.clicked.connect(self.show_payment_stats)
+
+        # Tabla para el reporte de pagos
+        self.payment_stats_table = QTableWidget(self)
+        self.payment_stats_table.move(850, 550)
+        self.payment_stats_table.setFixedSize(800, 300)
+        self.payment_stats_table.setColumnCount(6)
+        self.payment_stats_table.setHorizontalHeaderLabels(["Fecha", "Pagos", "Ventas", "Tatol de pagos", "Total de ventas", "Perdidas"])
+        self.payment_stats_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.payment_stats_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.payment_stats_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
     def populate_order_report_table(self) -> None:
             # Limpiar la tabla existente
@@ -340,4 +351,90 @@ class ReportWindows(QWidget):
         return top_drink, top_protein, top_side, top_dessert
     #endregion
 
+    #region pagos
+    # En este apartado todos los pagos van a considerarse ventas, pero solo los pagos exitosos van a ser considerados pagos o finalizados
+    # Del boton de generar estadisticas de pagos se debe de generar un grafico de las ventas y pagos en el rango de fechas seleccionado
+    # Debe de devolver la grafica de las ventas y pagos en el rango de fechas seleccionado
+    def show_payment_stats(self):
+        # Obtén las fechas seleccionadas
+        start_date = self.start_date_input.date().toPyDate()
+        end_date = self.end_date_input.date().toPyDate()
+
+        # Obtén las estadísticas de pagos y ventas en el rango de fechas seleccionado
+        payment_stats, sales_stats = self.get_payment_stats_in_range(start_date, end_date)
+
+        # Verificar que los diccionarios no esten vacios
+        if not payment_stats and not sales_stats:
+            QMessageBox.warning(self, "Error", "No hay datos para las fechas seleccionadas")
+            return
+        
+        # Limpiar la tabla existente
+        self.payment_stats_table.setRowCount(0)
+
+        # Fusionar los datos de pagos y ventas en un solo diccionario
+        total_stats = {}
+        for date, (payment_count, payment_total) in payment_stats.items():
+            sales_count, sales_total = sales_stats.get(date, (0, 0))
+            total_stats[date] = (payment_count, sales_count, payment_total, sales_total, sales_total - payment_total)
+
+        # Recorrer el diccionario de estadísticas totales y agregar los datos a la tabla
+        for date, stats in total_stats.items():
+            row_position = self.payment_stats_table.rowCount()
+            self.payment_stats_table.insertRow(row_position)
+            self.payment_stats_table.setItem(row_position, 0, QTableWidgetItem(date.strftime("%Y-%m-%d")))
+            self.payment_stats_table.setItem(row_position, 1, QTableWidgetItem(str(stats[0])))
+            self.payment_stats_table.setItem(row_position, 2, QTableWidgetItem(str(stats[1])))
+            self.payment_stats_table.setItem(row_position, 3, QTableWidgetItem(str(stats[2])))
+            self.payment_stats_table.setItem(row_position, 4, QTableWidgetItem(str(stats[3])))
+            self.payment_stats_table.setItem(row_position, 5, QTableWidgetItem(str(stats[4])))
+    
+    def get_payment_stats_in_range(self, start_date, end_date) -> None:
+        
+        # Inicializamos donde se va a guardar en un diccionario las fechas y la información de los pagos
+        payment_stats = {}
+
+        # Inicializamos donde se va a guardar en un diccionario las fechas y la información de las ventas
+        sales_stats = {}
+
+        # Validar que la fecha inicial sea menor o igual a la fecha final
+        if start_date > end_date:
+            print("La fecha inicial no puede ser mayor a la fecha final")
+            return payment_stats, sales_stats
+
+        # Si alguna de las fechas está vacía, retornamos las listas con una tupla None, 0
+        if not start_date or not end_date:
+            QMessageBox.warning(self, "Error", "Las fechas no pueden estar vacías")
+
+        # Recorremos el historial de pagos
+        for date, payments in self.payment_log.payment_history.items():
+            # Si la fecha está en el rango de fechas seleccionado
+            if start_date <= date <= end_date:
+                # Inicializamos las variables para guardar la cantidad de pagos y el monto total de pagos
+                payment_count = 0
+                payment_total = 0
+                sales_count = 0
+                sales_total = 0
+
+                # Recorremos los pagos
+                for payment in payments:
+                    if payment.status:
+                        # Incrementamos el contador de pagos
+                        payment_count += 1
+
+                        # Si el pago fue exitoso, incrementamos el monto total de pagos
+                        payment_total += payment.billing_amount
+
+                    # Siempre incrementamos el contador de ventas y el monto total de ventas
+                    sales_count += 1
+                    sales_total += payment.billing_amount
+
+                # Agregamos la fecha y la información de los pagos al diccionario
+                payment_stats[date] = (payment_count, payment_total)
+
+                # Agregamos la fecha y la información de las ventas al diccionario
+                sales_stats[date] = (sales_count, sales_total)
+
+        return payment_stats, sales_stats
+
+    #endregion
     
