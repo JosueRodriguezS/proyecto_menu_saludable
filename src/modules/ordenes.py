@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from modules.plato import Plato
 from datetime import datetime
+import uuid
 
 """
 NOTA: Esta clase va implementar el patrón de diseño Observer.
@@ -35,6 +36,7 @@ Payment va a tener los siguientes atributos:
     - is_cash: bool
 """
 class Payment:
+    id: str
     orders: list[Order]
     is_cash: bool
     billing_amount: int
@@ -42,6 +44,8 @@ class Payment:
 
     # Constructor de la clase Payment
     def __init__(self, orders: list[Order], is_cash: bool) -> None:
+        # se debe de generar un id único para cada pago (puede ser un número aleatorio)
+        self.id = UniqueIDGenerator.generate_unique_id()
         self.orders = orders
         self.is_cash = is_cash
         self.billing_amount = self.calculate_billing_amount()
@@ -50,6 +54,10 @@ class Payment:
     # Método para calcular el monto de la factura
     def calculate_billing_amount(self) -> None:
         return sum(sum(dish.price for dish in order.dishes) for order in self.orders)
+
+    # Método para cambiar el estado del pago
+    def change_status(self, status: bool) -> None:
+        self.status = status
 
 """
 Nota: esta clase va implementar el patrón de diseño Observer.
@@ -166,3 +174,19 @@ class Table:
     def edit_single_bill(self, single_bill: bool) -> None:
         self.single_bill = single_bill
         
+
+"""
+La clase UniqueIdGenerator va a representar a un generador de ids únicos.
+La va utilizar la clase Payment para generar un id único para cada pago.
+"""
+
+class UniqueIDGenerator:
+        used_ids = set()
+
+        @staticmethod
+        def generate_unique_id():
+            unique_id = str(uuid.uuid4())
+            while unique_id in UniqueIDGenerator.used_ids:
+                unique_id = str(uuid.uuid4())
+            UniqueIDGenerator.used_ids.add(unique_id)
+            return unique_id

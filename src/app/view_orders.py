@@ -2,6 +2,7 @@ import sqlite3
 from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QAbstractItemView, QPushButton, QWidget, QDialog, QDialog, QVBoxLayout, QLabel, QLineEdit, QComboBox, QMessageBox, QRadioButton, QButtonGroup, QCheckBox
 from PyQt5.QtGui import QFont
 from modules.ordenes import Order, Payment, Table, OrderLog, PaymentLog
+from datetime import datetime
 
 class OrderPaymentWindow(QWidget):
     def __init__(self, restaurant_model) -> None:
@@ -150,11 +151,16 @@ class OrderPaymentWindow(QWidget):
         self.payment_log_label.setGeometry(800, 630, 150, 20)
         self.payment_log_table = QTableWidget(self)
         self.payment_log_table.setGeometry(800, 650, 750, 200)
-        self.payment_log_table.setColumnCount(4)
-        self.payment_log_table.setHorizontalHeaderLabels(["Orden", "Es efectivo", "Monto", "Estado"])
+        self.payment_log_table.setColumnCount(6)
+        self.payment_log_table.setHorizontalHeaderLabels(["Fecha","Id","Orden", "Es efectivo", "Monto", "Estado"])
         self.payment_log_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.payment_log_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.populate_payment_log_table()
+
+        # Boton para finalizar un pago/factura
+        self.close_payment_button = QPushButton("Cerrar Pago", self)
+        self.close_payment_button.setGeometry(800, 590, 150, 30)
+        self.close_payment_button.clicked.connect(self.close_payment)
 
     # Metodo para crear una orden
     """
@@ -200,34 +206,55 @@ class OrderPaymentWindow(QWidget):
         Al cerrar una orden, se debe de crear un objeto Order y agregarlo al log de ordenes.
         Se deben generar los pagos correspondientes a la orden.
         """
+        # hay que chequear que el numero de clientes no este vacio o sea un entero
+        if self.number_of_customers_text.text() == "":
+            QMessageBox.warning(self, "Error", "El número de clientes no puede estar vacío", QMessageBox.Ok)
+            return
+        try:
+            int(self.number_of_customers_text.text())
+        except:
+            QMessageBox.warning(self, "Error", "El número de clientes debe ser un número entero", QMessageBox.Ok)
+            return
+        
         #region Crear objeto Order
         order = self.create_order()
         if order is None:
             return
         #endregion
 
-        # Se agrega la orden a una lista para poder agregarla al pago
-        orders = []
-        orders.append(order)
+        #Lista de pagos que se van a generar
+        payments = []
 
         #region Crear objeto Payment
         if self.single_payment.isChecked():
+            # Se agrega la orden a una lista para poder agregarla al pago
+            orders = []
+            orders.append(order)
             is_cash = True if self.payment_method_combo.currentText() == "Efectivo" else False
             payment = Payment(orders=orders, is_cash=is_cash)
-            print(payment.billing_amount)
+            payments.append(payment)
         else:
             #Es necesario generar un pago por cada cliente y plato
             #Primero validamos que el número de clientes y el número de platos sea el mismo
-            if len(orders[0].dishes) != int(self.number_of_customers_text.text()):
+            if len(order.dishes) != int(self.number_of_customers_text.text()):
                 QMessageBox.warning(self, "Error", "El número de clientes debe ser igual al número de platos", QMessageBox.Ok)
                 return
-            else:
-                # Se crea un pago por cada cliente y plato
+            else:        
+                # optenemos los nombres de los clientes al separar el string por comas
+                customers_names = self.customer_name_input.text().split(",")
+                # Se crea una lista de ordenes para cada cliente el cliente del indice i tiene el plato del indice i
+                orders = []
+                for i in range(len(customers_names)):
+                    order_temp = Order(table_number=order.table_number, customers_name=customers_names[i], status="Lista")
+                    order_temp.add_dish(order.dishes[i])
+                    orders.append(order_temp)
+                # Se crea una lista de pagos
                 payments = []
-                for i in range(len(orders[0].dishes)):
-                    orders_temp = []
-                    orders_temp.append(orders[0])
-                    payment = Payment(orders=orders_temp, is_cash=True)
+
+                # Se crea un pago por cada cliente
+                for i in range(len(customers_names)):
+                    is_cash = True if self.payment_method_combo.currentText() == "Efectivo" else False
+                    payment = Payment(orders=[orders[i]], is_cash=is_cash)
                     payments.append(payment)
         #endregion
 
@@ -238,7 +265,8 @@ class OrderPaymentWindow(QWidget):
         table.add_order(order)
         self.populate_order_log_table()
         # Se actualiza el payment_log de la mesa
-        table.add_payment(payment)
+        for payment in payments:
+            table.add_payment(payment)
         self.populate_payment_log_table()
         # Se actualiza el numero de clientes de la mesa
         table.edit_number_of_customers(int(self.number_of_customers_text.text()))
@@ -250,6 +278,52 @@ class OrderPaymentWindow(QWidget):
 
         # Se devuelve la mesa actualizada a la lista de mesas
         self.tablesData[order.table_number] = table
+
+    # Metodo para el boton cerrar pago
+    def close_payment(self) -> None:
+        """
+        Este es el método que permite cerrar/pagar un pago. 
+        El método permite que un pago seleccionado cambie su estado de No exitoso a Exitoso.
+        Se debe validar que el usuario haya seleccionado un pago y el pago sea no exitoso.
+        """
+        # Obtenemos el pago al que se le va a cambiar el estado
+        selected_payment_row = self.payment_log_table.currentRow()
+
+        # Se valida que se haya seleccionado un pago
+        if selected_payment_row == -1:
+            QMessageBox.warning(self, "Error", "No se ha seleccionado un pago", QMessageBox.Ok)
+            return
+
+        # Obtenemos el ID del pago seleccionado
+        selected_payment_id = self.payment_log_table.item(selected_payment_row, 1).text()
+
+        # Buscamos el pago correspondiente en el historial de pagos
+        selected_payment = None
+        for date, payments in self.payment_log.payment_history.items():
+            for payment in payments:
+                if payment.id == selected_payment_id:
+                    selected_payment = payment
+                    break
+
+        # Validamos que el pago se haya encontrado
+        if selected_payment is None:
+            QMessageBox.warning(self, "Error", "No se encontró el pago seleccionado", QMessageBox.Ok)
+            return
+
+        # Obtenemos el estado del pago seleccionado
+        selected_payment_status = self.payment_log_table.item(selected_payment_row, 4).text()
+
+        # Se valida que el pago sea no exitoso
+        if selected_payment_status == "Exitoso":
+            QMessageBox.warning(self, "Error", "El pago seleccionado ya es exitoso", QMessageBox.Ok)
+            return
+
+        # Se cambia el estado del pago a exitoso
+        selected_payment.change_status(True)
+
+        # No necesitas actualizar el diccionario, ya que el pago en la lista se ha modificado directamente
+        self.populate_payment_log_table()
+
 
     def add_combo(self) -> None:
         # usar try except para evitar que se caiga el programa si no se selecciona una fila
@@ -349,18 +423,24 @@ class OrderPaymentWindow(QWidget):
                 self.order_log_table.setItem(row_position, 4, QTableWidgetItem(order_details))
 
     def populate_payment_log_table(self) -> None:   
-
-       # Limpiar la tabla existente
+        # Limpiar la tabla existente
         self.payment_log_table.setRowCount(0)
 
         # Recorrer el historial de pagos y agregar los pagos a la tabla
         for date, payments in self.payment_log.payment_history.items():
             for payment in payments:
                 # Obtener detalles del pago en una cadena
+                payment_id = payment.id
                 orders_info = ", ".join([f"{order.table_number} ({order.customers_name})" for order in payment.orders])
-                payment_details = f"Órdenes: {orders_info}, Método: {'Efectivo' if payment.is_cash else 'No Efectivo'}, Monto: {payment.billing_amount}, Estado: {'Exitoso' if payment.status else 'No Exitoso'}"
+                payment_details = f"{'Efectivo' if payment.is_cash else 'No Efectivo'}"
+                payment_status = 'Exitoso' if payment.status else 'No Exitoso'
 
                 # Agregar el pago a la tabla
                 row_position = self.payment_log_table.rowCount()
                 self.payment_log_table.insertRow(row_position)
                 self.payment_log_table.setItem(row_position, 0, QTableWidgetItem(date.strftime("%Y-%m-%d")))
+                self.payment_log_table.setItem(row_position, 1, QTableWidgetItem(payment_id))
+                self.payment_log_table.setItem(row_position, 2, QTableWidgetItem(orders_info))
+                self.payment_log_table.setItem(row_position, 3, QTableWidgetItem(payment_details))
+                self.payment_log_table.setItem(row_position, 4, QTableWidgetItem(str(payment.billing_amount)))
+                self.payment_log_table.setItem(row_position, 5, QTableWidgetItem(payment_status))

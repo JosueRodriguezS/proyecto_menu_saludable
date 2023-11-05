@@ -151,6 +151,26 @@ tables[3] = table3
 tables[4] = table4
 tables[5] = table5
 tables[6] = table6
+
+# agregamos algunas ordenes y pagos a las mesas
+# Ordenes
+order1 = Order(1, "carlos", "Lista")
+order1.add_dish(combo_plates[0])
+order1.add_dish(combo_plates[3])
+order2 = Order(2, "juan", "Lista")
+order2.add_dish(combo_plates[1])
+order2.add_dish(combo_plates[4])
+table1.add_order(order1)
+table3.add_order(order2)
+
+# Pagos
+temp_order1 = [order1]
+temp_order2 = [order2]
+payment1 = Payment(temp_order1, True)
+payment2 = Payment(temp_order2, True)
+table1.add_payment(payment1)
+table3.add_payment(payment2)
+
 #endregion
 
 #region de la clase restaurante para mantener los datos actualizados mientras se usa el programa
