@@ -1,5 +1,5 @@
 #region imports
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QAction
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QAction, QLabel
 from PyQt5.QtCore import Qt
 
 import sys
@@ -198,7 +198,7 @@ class MyApp(QMainWindow):
         self.restaurant_model = restaurant_model
 
         self.setWindowTitle("Restaurante")
-        self.setGeometry(100, 100, 600, 400)
+        self.setGeometry(100, 100, 1200, 1000)
 
         menubar = self.menuBar()
 
@@ -207,7 +207,6 @@ class MyApp(QMainWindow):
         dish_menu = menubar.addMenu("Platillos")
         order_menu = menubar.addMenu("Ordenes y Pagos")
         report_menu = menubar.addMenu("Reportes")
-
 
         # Add the actions to the menus
         inventory_action = QAction("Editar inventario", self)
@@ -225,7 +224,8 @@ class MyApp(QMainWindow):
         report_action = QAction("Ver reportes", self)
         report_action.triggered.connect(self.open_report)
         report_menu.addAction(report_action)
-    
+
+    # add the functions to open the windows
     def open_inventory(self):
         self.inventory_window = InventoryWindow(self.restaurant_model)
         self.inventory_window.show()
