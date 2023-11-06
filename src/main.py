@@ -1,6 +1,5 @@
 #region imports
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QAction, QLabel
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction
 
 import sys
 import sqlite3
@@ -243,6 +242,7 @@ class MyApp(QMainWindow):
         self.report_window.show()
 
 def main():
+    
     app = QApplication(sys.argv)
 
     restaurant_model = RestauranteModel()

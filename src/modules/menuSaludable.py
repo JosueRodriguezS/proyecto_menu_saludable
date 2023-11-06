@@ -1,6 +1,6 @@
 from modules.plato import Plato
-from modules.inventario import FoodElement
-
+from modules.inventario import FoodElement, Inventory
+from pyswip import Prolog
 
 class MenuSaludable(Plato):
     drink: FoodElement
@@ -20,3 +20,20 @@ class MenuSaludable(Plato):
 
     def is_combo(self) -> bool:
         return False
+
+# Metodo para cargar inventario a prolog y generar menu saludables
+def generate_sa1udable(inventory: Inventory):
+
+    prolog = Prolog()
+    prolog.consult("src\\modules\\menuSaludable.pl")
+    for food in inventory.food_elements.values():
+        prolog.assertz(f"element({food.name}, {food.food_type}, {food.characteristics})")
+
+    # Ejemplo de consulta para verificar que los elementos se hayan cargado correctamente
+    for element in prolog.query("element(X, Type, Characteristics)"):
+        print(f"Elemento: {element['X']} - Tipo: {element['Type']} - Características: {element['Characteristics']}")
+
+    # Genera menús saludables
+    for menu in prolog.query("generate_saludable(5, MenuSaludable)"):
+        print("Menú Saludable:", list(menu['MenuSaludable']))
+
