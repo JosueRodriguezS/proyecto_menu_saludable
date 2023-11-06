@@ -2,7 +2,9 @@ import sqlite3
 from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QAbstractItemView, QPushButton, QWidget, QDialog, QDialog, QVBoxLayout, QLabel, QLineEdit, QComboBox, QMessageBox, QRadioButton, QButtonGroup, QCheckBox
 from PyQt5.QtGui import QFont
 from modules.ordenes import Order, Payment, Table, OrderLog, PaymentLog
+from modules.menuSaludable import MenuSaludable
 from datetime import datetime
+import random
 
 class OrderPaymentWindow(QWidget):
     def __init__(self, restaurant_model) -> None:
@@ -144,8 +146,9 @@ class OrderPaymentWindow(QWidget):
         # Boton para generar nuevos menus saludables
         self.generate_saludable_button = QPushButton("Generar Menus Saludables", self)
         self.generate_saludable_button.setGeometry(800, 500, 350, 30)
-        #self.generate_saludable_button.clicked.connect(self.generate_saludable)
+        self.generate_saludable_button.clicked.connect(self.generate_saludable)
         
+
         # Tabla de los pagos
         self.payment_log_label = QLabel("Pagos:", self)
         self.payment_log_label.setGeometry(800, 630, 150, 20)
@@ -324,6 +327,70 @@ class OrderPaymentWindow(QWidget):
         # No necesitas actualizar el diccionario, ya que el pago en la lista se ha modificado directamente
         self.populate_payment_log_table()
 
+    # para testeos
+    def generate_saludable(self) -> None:
+        # Se obtiene el inventario
+        inventory = self.inventoryData
+
+        # Se obtiene la lista de menus saludables
+        menu_saludables = self.menu_saludablesData
+
+        dialog = menu_salusable(menu_saludables, inventory)
+
+        if dialog.exec() == QDialog.Accepted:
+
+            # Se obtienen las caracteristicas de los platillos
+            if dialog.get_drink_characteristic() == "" or dialog.get_protein_characteristic() == "" or dialog.get_side_dish_characteristic() == "" or dialog.get_dessert_characteristic() == "":
+                QMessageBox.warning(self, "Error", "Las caracteristicas no pueden estar vacias", QMessageBox.Ok)
+                return
+            
+            drink_characteristic = dialog.get_drink_characteristic()
+            protein_characteristic = dialog.get_protein_characteristic()
+            side_dish_characteristic = dialog.get_side_dish_characteristic()
+            dessert_characteristic = dialog.get_dessert_characteristic()
+
+            print(drink_characteristic, protein_characteristic, side_dish_characteristic, dessert_characteristic)
+
+            # Se va a generar todas las combinaciones posibles de food_elements que cumplan con las caracteristicas
+            # Se obtienen las bebidas que cumplen con la caracteristica
+            drinks = [drink for drink in inventory.food_elements.values() if drink.food_type == "bebida" and drink_characteristic in drink.characteristics]
+            # Se obtienen las proteinas que cumplen con la caracteristica
+            proteins = [protein for protein in inventory.food_elements.values() if protein.food_type == "proteina" and protein_characteristic in protein.characteristics]
+            # Se obtienen los acompañamientos que cumplen con la caracteristica
+            side_dishes = [side_dish for side_dish in inventory.food_elements.values() if side_dish.food_type == "acompanamiento" and side_dish_characteristic in side_dish.characteristics]
+            # Se obtienen los postres que cumplen con la caracteristica
+            desserts = [dessert for dessert in inventory.food_elements.values() if dessert.food_type == "postre" and dessert_characteristic in dessert.characteristics]
+
+            # Se crea una lista de todos los menus saludables que se pueden generar
+            new_menu_saludables = []
+
+            # Se generan 5 menus saludables escogiendo una combinacion aleatoria de drink, protein, side_dish y dessert
+            for i in range(5):
+  
+                drink = drinks[random.randint(0, len(drinks) - 1)]
+                protein = proteins[random.randint(0, len(proteins) - 1)]
+                side_dish = side_dishes[random.randint(0, len(side_dishes) - 1)]
+                dessert = desserts[random.randint(0, len(desserts) - 1)]
+
+                # Se crea el menu saludable
+                new_menu_saludable = MenuSaludable(id=len(menu_saludables) + len(new_menu_saludables),
+                                                   name= f"Menu Saludable {len(menu_saludables) + len(new_menu_saludables)}",
+                                                    price=drink.price + protein.price + side_dish.price + dessert.price,
+                                                    calories=drink.calories + protein.calories + side_dish.calories + dessert.calories,
+                                                    drink=drink,
+                                                    protein=protein,
+                                                    side_dish=side_dish,
+                                                    dessert=dessert)
+                # Se agrega el menu saludable a la lista de menus saludables
+                new_menu_saludables.append(new_menu_saludable)
+
+            # Se agregan los nuevos menús saludables que no se encuentren en la lista de menús saludables
+            for new_menu_saludable in new_menu_saludables:
+                if new_menu_saludable not in menu_saludables:
+                    menu_saludables.append(new_menu_saludable)
+
+            # Se actualiza la tabla de menus saludables
+            self.populate_saludable_table_no_id()
 
     def add_combo(self) -> None:
         # usar try except para evitar que se caiga el programa si no se selecciona una fila
@@ -444,3 +511,79 @@ class OrderPaymentWindow(QWidget):
                 self.payment_log_table.setItem(row_position, 3, QTableWidgetItem(payment_details))
                 self.payment_log_table.setItem(row_position, 4, QTableWidgetItem(str(payment.billing_amount)))
                 self.payment_log_table.setItem(row_position, 5, QTableWidgetItem(payment_status))
+
+# clase para generar los nuevos menus saludables
+class menu_salusable(QDialog):
+    def __init__(self, menus_saludables, inventory) -> None:
+        super().__init__()
+
+        self.setWindowTitle("Generar Menus Saludables")
+        self.setGeometry(100, 100, 1000, 700)
+
+        layout = QVBoxLayout()
+
+        self.title_label = QLabel("Generar Menus Saludables")
+        fontTitle = QFont()
+        fontTitle.setPointSize(14)
+        fontTitle.setBold(True)
+        self.title_label.setFont(fontTitle)
+        self.title_label.setGeometry(20, 20, 300, 40)
+        layout.addWidget(self.title_label)
+
+        # Label y espacio de la caracteristica de la bebida
+        self.drink_label = QLabel("Bebida:")
+        self.drink_label.setGeometry(20, 70, 150, 20)
+        self.drink_input = QComboBox()
+        self.drink_input.addItems(inventory.get_all_drinks_characteristics())
+        self.drink_input.setGeometry(180, 70, 100, 20)
+        layout.addWidget(self.drink_label)
+        layout.addWidget(self.drink_input)
+
+        # Label y espacio de la caracteristica de la proteina
+        self.protein_label = QLabel("Proteina:")
+        self.protein_label.setGeometry(20, 110, 150, 20)
+        self.protein_input = QComboBox()
+        self.protein_input.addItems(inventory.get_all_proteins_characteristics())
+        self.protein_input.setGeometry(180, 110, 100, 20)
+        layout.addWidget(self.protein_label)
+        layout.addWidget(self.protein_input)
+
+        # Label y espacio de la caracteristica del acompañamiento
+        self.side_dish_label = QLabel("Acompañamiento:")
+        self.side_dish_label.setGeometry(20, 150, 150, 20)
+        self.side_dish_input = QComboBox()
+        self.side_dish_input.addItems(inventory.get_all_side_dishes_characteristics())
+        self.side_dish_input.setGeometry(180, 150, 100, 20)
+        layout.addWidget(self.side_dish_label)
+        layout.addWidget(self.side_dish_input)
+
+        # Label y espacio de la caracteristica del postre
+        self.dessert_label = QLabel("Postre:")
+        self.dessert_label.setGeometry(20, 190, 150, 20)
+        self.dessert_input = QComboBox()
+        self.dessert_input.addItems(inventory.get_all_desserts_characteristics())
+        self.dessert_input.setGeometry(180, 190, 100, 20)
+        layout.addWidget(self.dessert_label)
+        layout.addWidget(self.dessert_input)
+
+        # Botono para generar los menus saludables
+        self.generate_button = QPushButton("Generar", self)
+        self.generate_button.setGeometry(20, 230, 150, 30)
+        self.generate_button.clicked.connect(self.accept)
+        layout.addWidget(self.generate_button)
+
+        self.setLayout(layout)
+
+    # Metodo para obtener la caracteristica de la bebida
+    def get_drink_characteristic(self) -> str:
+        return self.drink_input.currentText()
+    
+    # Metodo para obtener la caracteristica de la proteina
+    def get_protein_characteristic(self) -> str:
+        return self.protein_input.currentText()
+    
+    def get_side_dish_characteristic(self) -> str:
+        return self.side_dish_input.currentText()
+    
+    def get_dessert_characteristic(self) -> str:
+        return self.dessert_input.currentText()

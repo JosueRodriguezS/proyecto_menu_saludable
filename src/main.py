@@ -5,7 +5,6 @@ from PyQt5.QtCore import Qt
 import sys
 import sqlite3
 
-from app.form_menu_saludable import menuSaludableWindow
 from modules.inventario import FoodElement, Inventory
 from modules.plato import ComboPlate
 from modules.menuSaludable import MenuSaludable
@@ -97,7 +96,7 @@ cursor.execute("SELECT id, name, price, calories, drink_name, protein_name, side
 menu_saludable_data = cursor.fetchall()
 
 # Crear una lista de objetos MenuSaludable
-menu_saludables = []
+menu_saludables: list[MenuSaludable] = []
 for data in menu_saludable_data:
     id, name, price, calories, drink_name, protein_name, side_dish_name, dessert_name = data
 

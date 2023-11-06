@@ -42,6 +42,7 @@ class AddComboWindow(QDialog):
 
         self.protein_label = QLabel("Proteina")
         self.protein_input = QComboBox()
+
         # Generar lista de nombres de proteinas usando el inventario
         self.protein_input.addItems(inventoryData.get_food_elements_names("proteina"))
         layout.addWidget(self.protein_label)
@@ -128,6 +129,7 @@ class ModifyComboWindow(QDialog):
 
         self.protein_label = QLabel("Proteina")
         self.protein_input = QComboBox()
+
         # Generar lista de nombres de proteinas usando el inventario
         self.protein_input.addItems(inventoryData.get_food_elements_names("proteina"))
         self.protein_input.setCurrentText(combo_plate.protein.name)
@@ -303,7 +305,7 @@ class DishWindow(QWidget):
         self.restaurant_model = restaurant_model
         self.inventoryData: Inventory = restaurant_model.inventory
         self.combo_platesData: list[ComboPlate] = restaurant_model.combo_plates
-        self.menu_saludablesData: MenuSaludable = restaurant_model.menu_saludables
+        self.menu_saludablesData: list[MenuSaludable] = restaurant_model.menu_saludables
         self.setWindowTitle("Combos y Menu Saludable")
         self.setGeometry(100, 100, 1200, 1000)
 
@@ -349,14 +351,14 @@ class DishWindow(QWidget):
  
         # Crear la tabla para vizualizar el menu saludable
         self.menu_saludablesTable = QTableWidget(self)
-        self.menu_saludablesTable.setGeometry(0, 600, 1200, 400)
-        self.menu_saludablesTable.setColumnCount(8)
-        self.menu_saludablesTable.setHorizontalHeaderLabels(["ID", "Nombre", "Precio", "Calorias", "Bebida", "Proteina", "Acompañamiento", "Postre"])
+        self.menu_saludablesTable.setGeometry(0, 600, 1000, 500)
+        self.menu_saludablesTable.setColumnCount(7)
+        self.menu_saludablesTable.setHorizontalHeaderLabels(["Nombre", "Precio", "Calorias", "Bebida", "Proteina", "Acompañamiento", "Postre"])
         self.menu_saludablesTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.menu_saludablesTable.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Populando la tabla de combos
         self.populate_combo_table()
+        self.populate_menu_saludable_table()
 
     # region Combo Plate Table
     # Método para poblar la tabla de combos
@@ -382,6 +384,24 @@ class DishWindow(QWidget):
             self.combo_platesTable.setItem(rowPosition, 6, QTableWidgetItem(combo_plate.side_dish.name))
             self.combo_platesTable.setItem(rowPosition, 7, QTableWidgetItem(combo_plate.dessert.name))
 
+    def populate_menu_saludable_table(self) -> None:
+
+        menu_saludables: list[MenuSaludable] = self.menu_saludablesData
+        
+        self.menu_saludablesTable.setRowCount(0)
+
+        for menu_saludable in menu_saludables:
+            rowPosition = self.menu_saludablesTable.rowCount()
+            self.menu_saludablesTable.insertRow(rowPosition)
+
+            self.menu_saludablesTable.setItem(rowPosition, 0, QTableWidgetItem(menu_saludable.name))
+            self.menu_saludablesTable.setItem(rowPosition, 1, QTableWidgetItem(str(menu_saludable.price)))
+            self.menu_saludablesTable.setItem(rowPosition, 2, QTableWidgetItem(str(menu_saludable.calories)))
+            self.menu_saludablesTable.setItem(rowPosition, 3, QTableWidgetItem(menu_saludable.drink.name))
+            self.menu_saludablesTable.setItem(rowPosition, 4, QTableWidgetItem(menu_saludable.protein.name))
+            self.menu_saludablesTable.setItem(rowPosition, 5, QTableWidgetItem(menu_saludable.side_dish.name))
+            self.menu_saludablesTable.setItem(rowPosition, 6, QTableWidgetItem(menu_saludable.dessert.name))
+
     # Método para poblar la tabla combo según el rango de precio    
     def populate_combo_table_by_price(self) -> None:
 
@@ -398,8 +418,6 @@ class DishWindow(QWidget):
             # Se obtienen los precios
             min_price = dialog.get_min_price()
             max_price = dialog.get_max_price()
-            print(min_price)
-            print(max_price)
 
             # verificar el range de precio
             if min_price > max_price:

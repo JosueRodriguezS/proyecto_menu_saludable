@@ -67,3 +67,44 @@ class Inventory:
 
         return list(all_characteristics)
 
+    def get_all_drinks_characteristics(self) -> list:
+        all_drinks_characteristics = set()
+
+        for food_element in self.food_elements.values():
+            if food_element.food_type == 'bebida':
+                characteristics = food_element.characteristics.split(', ')
+                all_drinks_characteristics.update(characteristics)
+
+        return list(all_drinks_characteristics)   
+    
+    def get_all_proteins_characteristics(self) -> list:
+        all_proteins_characteristics = set()
+
+        for food_element in self.food_elements.values():
+            if food_element.food_type == 'proteina':
+                characteristics = food_element.characteristics.split(', ')
+                all_proteins_characteristics.update(characteristics)
+
+        return list(all_proteins_characteristics)
+    
+    def get_all_side_dishes_characteristics(self) -> list:
+        all_side_dishes_characteristics = set()
+
+        for food_element in self.food_elements.values():
+            if food_element.food_type == 'acompanamiento':
+                characteristics = food_element.characteristics.split(', ')
+                all_side_dishes_characteristics.update(characteristics)
+
+        return list(all_side_dishes_characteristics)
+    
+    def get_all_desserts_characteristics(self) -> list:
+        all_desserts_characteristics = set()
+
+        for food_element in self.food_elements.values():
+            if food_element.food_type == 'postre':
+                characteristics = food_element.characteristics.split(', ')
+                all_desserts_characteristics.update(characteristics)
+
+        return list(all_desserts_characteristics)
+    
+    
